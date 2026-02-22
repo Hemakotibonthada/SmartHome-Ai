@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/core/services/demo_mode_service.dart';
 import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
 import 'package:smart_home_ai/shared/widgets/hover_card.dart';
+import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/core/services/advanced_home_service.dart';
 import 'package:smart_home_ai/core/services/security_lifestyle_service.dart';
 
@@ -14,12 +16,24 @@ class LifestyleHubScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final adv = context.watch<AdvancedHomeService>();
     final sec = context.watch<SecurityLifestyleService>();
+    final isDemo = context.watch<DemoModeService>().isDemoMode;
 
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
         child: SafeArea(
-          child: CustomScrollView(
+          child: !isDemo && adv.audioZones.isEmpty
+              ? Column(
+                  children: [
+                    _buildHeader(context),
+                    const Expanded(child: EmptyStateWidget(
+                      icon: Icons.nightlife,
+                      title: 'Lifestyle Features Not Set Up',
+                      message: 'Connect your entertainment and lifestyle devices to unlock these features. Enable Demo Mode to explore.',
+                    )),
+                  ],
+                )
+              : CustomScrollView(
             physics: WebContentWrapper.scrollPhysics,
             slivers: [
               SliverToBoxAdapter(child: _buildHeader(context)),

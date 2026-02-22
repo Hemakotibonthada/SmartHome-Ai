@@ -9,6 +9,7 @@ class DeviceProvider extends ChangeNotifier {
   List<Room> _rooms = [];
   String _selectedRoom = 'All';
   bool _isLoading = true;
+  bool _demoMode = false;
 
   List<SmartDevice> get devices => _selectedRoom == 'All'
       ? _devices
@@ -17,12 +18,28 @@ class DeviceProvider extends ChangeNotifier {
   List<Room> get rooms => _rooms;
   String get selectedRoom => _selectedRoom;
   bool get isLoading => _isLoading;
+  bool get isDemoMode => _demoMode;
+
+  /// Whether there is any data to show
+  bool get hasData => _devices.isNotEmpty;
 
   int get activeCount => _devices.where((d) => d.isOn).length;
   int get totalCount => _devices.length;
 
-  DeviceProvider() {
-    loadDevices();
+  DeviceProvider();
+
+  /// Called when demo mode changes.
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    _deviceService.setDemoMode(value);
+    if (value) {
+      loadDevices();
+    } else {
+      _devices = [];
+      _rooms = [];
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadDevices() async {
@@ -30,8 +47,15 @@ class DeviceProvider extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(const Duration(milliseconds: 500));
-    _devices = _deviceService.getDevices();
-    _rooms = _deviceService.getRooms();
+
+    if (_demoMode) {
+      _devices = _deviceService.getDevices();
+      _rooms = _deviceService.getRooms();
+    } else {
+      // Live mode: no simulated devices
+      _devices = [];
+      _rooms = [];
+    }
 
     _isLoading = false;
     notifyListeners();

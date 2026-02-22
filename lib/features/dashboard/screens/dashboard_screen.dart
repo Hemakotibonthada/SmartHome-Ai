@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/core/services/demo_mode_service.dart';
 import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
 import 'package:smart_home_ai/shared/widgets/hover_card.dart';
+import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/core/models/sensor_data.dart';
 import 'package:smart_home_ai/core/services/smart_features_service.dart';
 import 'package:smart_home_ai/core/services/energy_analytics_service.dart';
@@ -65,6 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     super.build(context);
     final dashboard = context.watch<DashboardProvider>();
     final auth = context.read<AuthProvider>();
+    final demoMode = context.watch<DemoModeService>();
     final smartSvc = context.watch<SmartFeaturesService>();
     final energySvc = context.read<EnergyAnalyticsService>();
 
@@ -80,7 +83,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                     color: AppTheme.primaryColor,
                   ),
                 )
-              : RefreshIndicator(
+              : !dashboard.hasData && !demoMode.isDemoMode
+                  ? _buildLiveEmptyState(context, demoMode)
+                  : RefreshIndicator(
                   onRefresh: () => dashboard.loadData(),
                   color: AppTheme.primaryColor,
                   child: CustomScrollView(
@@ -251,12 +256,20 @@ class _DashboardScreenState extends State<DashboardScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Welcome home,',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.5),
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      'Welcome home,',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
+                    ),
+                    if (context.watch<DemoModeService>().isDemoMode) ...[
+                      const SizedBox(width: 8),
+                      const DemoBadge(),
+                    ],
+                  ],
                 ),
                 Text(
                   auth.user?.name ?? 'User',
@@ -816,6 +829,26 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLiveEmptyState(BuildContext context, DemoModeService demoMode) {
+    return CustomScrollView(
+      physics: WebContentWrapper.scrollPhysics,
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildAppBar(context.read<AuthProvider>(), context.read<DashboardProvider>()),
+        ),
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: EmptyStateWidget.connectHome(
+            onSetup: () {
+              // Switch to demo mode to explore features
+              demoMode.enableDemoMode();
+            },
+          ),
+        ),
+      ],
     );
   }
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/core/services/demo_mode_service.dart';
 import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
+import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/features/auth/providers/auth_provider.dart';
 import 'package:smart_home_ai/features/auth/screens/login_screen.dart';
 
@@ -29,6 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen>
     super.build(context);
     final auth = context.watch<AuthProvider>();
     final theme = context.watch<ThemeProvider>();
+    final demoMode = context.watch<DemoModeService>();
 
     return Scaffold(
       body: Container(
@@ -39,6 +42,10 @@ class _SettingsScreenState extends State<SettingsScreen>
             slivers: [
               SliverToBoxAdapter(child: _buildHeader()),
               SliverToBoxAdapter(child: _buildProfileCard(auth)),
+              // Demo Mode Toggle
+              SliverToBoxAdapter(child: _buildSection('Data Mode', [
+                _buildDemoModeToggle(demoMode),
+              ])),
               SliverToBoxAdapter(child: _buildSection('Home Settings', [
                 _buildToggle('Auto Mode', 'Automate based on patterns', Icons.auto_mode, _autoMode, (v) => setState(() => _autoMode = v)),
                 _buildToggle('Voice Control', 'Control with voice commands', Icons.mic, _voiceControl, (v) => setState(() => _voiceControl = v)),
@@ -77,11 +84,69 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Text(
-        'Settings',
-        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text(
+              'Settings',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          ),
+          if (context.watch<DemoModeService>().isDemoMode)
+            const DemoBadge(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDemoModeToggle(DemoModeService demoMode) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: demoMode.isDemoMode
+                  ? AppTheme.warningColor.withValues(alpha: 0.15)
+                  : AppTheme.primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              demoMode.isDemoMode ? Icons.science : Icons.cloud_sync,
+              color: demoMode.isDemoMode ? AppTheme.warningColor : AppTheme.primaryColor,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  demoMode.isDemoMode ? 'Demo Mode' : 'Live Mode',
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
+                ),
+                Text(
+                  demoMode.isDemoMode
+                      ? 'Showing simulated data for exploration'
+                      : 'Connected to real devices & services',
+                  style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.3)),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: demoMode.isDemoMode,
+            onChanged: (v) => demoMode.setDemoMode(v),
+            activeColor: AppTheme.warningColor,
+            activeTrackColor: AppTheme.warningColor.withValues(alpha: 0.3),
+            inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
+            inactiveThumbColor: Colors.white24,
+          ),
+        ],
       ),
     );
   }

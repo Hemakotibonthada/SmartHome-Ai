@@ -12,6 +12,17 @@ class DeviceService {
   Stream<Map<String, dynamic>> get dataStream => _dataController.stream;
   Timer? _simulationTimer;
 
+  /// Whether this service should generate simulated data.
+  bool _demoMode = false;
+  bool get isDemoMode => _demoMode;
+
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    if (!value) {
+      stopSimulation();
+    }
+  }
+
   // Simulated current values
   double _temperature = 25.0;
   double _humidity = 55.0;
@@ -21,6 +32,7 @@ class DeviceService {
   double _power = 550.0;
 
   void startSimulation() {
+    if (!_demoMode) return; // Only simulate in demo mode
     _simulationTimer?.cancel();
     _simulationTimer = Timer.periodic(const Duration(seconds: 8), (_) {
       _updateSimulatedData();
@@ -65,6 +77,7 @@ class DeviceService {
 
   /// Get current sensor readings
   Map<String, SensorData> getCurrentReadings() {
+    if (!_demoMode) return {}; // Live mode: no simulated data
     final now = DateTime.now();
     return {
       'temperature': SensorData(
@@ -132,6 +145,7 @@ class DeviceService {
 
   /// Generate historical sensor data for charts
   List<SensorData> getHistoricalData(SensorType type, Duration duration) {
+    if (!_demoMode) return []; // Live mode: no simulated history
     final now = DateTime.now();
     final dataPoints = <SensorData>[];
     final interval = duration.inMinutes > 1440 ? 60 : 5; // hourly or 5-min intervals
@@ -197,6 +211,7 @@ class DeviceService {
 
   /// Get all smart devices
   List<SmartDevice> getDevices() {
+    if (!_demoMode) return []; // Live mode: no simulated devices
     return [
       SmartDevice(
         id: 'dev_1', name: 'Living Room Light', room: 'Living Room',
@@ -251,6 +266,7 @@ class DeviceService {
 
   /// Get rooms
   List<Room> getRooms() {
+    if (!_demoMode) return []; // Live mode: no simulated rooms
     return [
       Room(
         id: 'room_1', name: 'Living Room',

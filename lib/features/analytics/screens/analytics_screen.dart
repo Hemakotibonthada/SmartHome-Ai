@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/core/services/demo_mode_service.dart';
 import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
+import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/core/models/user_model.dart';
 import 'package:smart_home_ai/features/analytics/providers/analytics_provider.dart';
 
@@ -30,7 +32,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         child: SafeArea(
           child: analytics.isLoading
               ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
-              : RefreshIndicator(
+              : !analytics.hasData && !context.watch<DemoModeService>().isDemoMode
+                  ? EmptyStateWidget.noAnalytics()
+                  : RefreshIndicator(
                   onRefresh: () => analytics.loadAnalytics(),
                   color: AppTheme.primaryColor,
                   child: CustomScrollView(

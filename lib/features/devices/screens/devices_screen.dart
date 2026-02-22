@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/core/services/demo_mode_service.dart';
 import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
+import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/core/models/device_model.dart';
 import 'package:smart_home_ai/features/devices/providers/device_provider.dart';
 import 'package:smart_home_ai/features/devices/widgets/device_card.dart';
@@ -30,7 +32,11 @@ class _DevicesScreenState extends State<DevicesScreen>
         child: SafeArea(
           child: deviceProvider.isLoading
               ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
-              : CustomScrollView(
+              : !deviceProvider.hasData && !context.watch<DemoModeService>().isDemoMode
+                  ? EmptyStateWidget.noDevices(
+                      onAdd: () => context.read<DemoModeService>().enableDemoMode(),
+                    )
+                  : CustomScrollView(
                   physics: WebContentWrapper.scrollPhysics,
                   slivers: [
                     // Header

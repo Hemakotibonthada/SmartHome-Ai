@@ -12,24 +12,45 @@ class SensorProvider extends ChangeNotifier {
   SensorType _selectedSensor = SensorType.temperature;
   String _selectedTimeRange = '24h';
   bool _isLoading = true;
+  bool _demoMode = false;
 
   Map<String, SensorData> get currentReadings => _currentReadings;
   Map<SensorType, List<SensorData>> get historicalData => _historicalData;
   SensorType get selectedSensor => _selectedSensor;
   String get selectedTimeRange => _selectedTimeRange;
   bool get isLoading => _isLoading;
+  bool get isDemoMode => _demoMode;
+
+  /// Whether there is any data to show
+  bool get hasData => _currentReadings.isNotEmpty;
 
   List<SensorData> get currentSensorHistory =>
       _historicalData[_selectedSensor] ?? [];
 
-  SensorProvider() {
-    loadSensorData();
-    _startMonitoring();
+  SensorProvider();
+
+  /// Called when demo mode changes.
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    _deviceService.setDemoMode(value);
+    if (value) {
+      loadSensorData();
+      _startMonitoring();
+    } else {
+      _refreshTimer?.cancel();
+      _deviceService.stopSimulation();
+      _currentReadings = {};
+      _historicalData = {};
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void _startMonitoring() {
+    if (!_demoMode) return;
     _deviceService.startSimulation();
     _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (!_demoMode) return;
       _currentReadings = _deviceService.getCurrentReadings();
       notifyListeners();
     });
@@ -41,12 +62,15 @@ class SensorProvider extends ChangeNotifier {
 
     await Future.delayed(const Duration(milliseconds: 600));
 
-    _currentReadings = _deviceService.getCurrentReadings();
-
-    // Load historical data for all sensor types
-    final duration = _getTimeRangeDuration();
-    for (final type in SensorType.values) {
-      _historicalData[type] = _deviceService.getHistoricalData(type, duration);
+    if (_demoMode) {
+      _currentReadings = _deviceService.getCurrentReadings();
+      final duration = _getTimeRangeDuration();
+      for (final type in SensorType.values) {
+        _historicalData[type] = _deviceService.getHistoricalData(type, duration);
+      }
+    } else {
+      _currentReadings = {};
+      _historicalData = {};
     }
 
     _isLoading = false;

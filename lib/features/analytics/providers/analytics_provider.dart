@@ -14,6 +14,7 @@ class AnalyticsProvider extends ChangeNotifier {
   List<Map<String, dynamic>> _anomalies = [];
   String _selectedPeriod = 'Week';
   bool _isLoading = true;
+  bool _demoMode = false;
 
   Map<String, dynamic> get energyReport => _energyReport;
   List<AIInsight> get insights => _insights;
@@ -21,9 +22,28 @@ class AnalyticsProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get anomalies => _anomalies;
   String get selectedPeriod => _selectedPeriod;
   bool get isLoading => _isLoading;
+  bool get isDemoMode => _demoMode;
 
-  AnalyticsProvider() {
-    loadAnalytics();
+  /// Whether there is any data to show
+  bool get hasData => _energyReport.isNotEmpty || _insights.isNotEmpty;
+
+  AnalyticsProvider();
+
+  /// Called when demo mode changes.
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    _aiService.setDemoMode(value);
+    _deviceService.setDemoMode(value);
+    if (value) {
+      loadAnalytics();
+    } else {
+      _energyReport = {};
+      _insights = [];
+      _predictions = [];
+      _anomalies = [];
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadAnalytics() async {
@@ -32,16 +52,23 @@ class AnalyticsProvider extends ChangeNotifier {
 
     await Future.delayed(const Duration(milliseconds: 800));
 
-    final sensorData = _deviceService.getCurrentReadings();
-    _energyReport = _aiService.generateEnergyReport();
-    _insights = _aiService.analyzeData(sensorData);
+    if (_demoMode) {
+      final sensorData = _deviceService.getCurrentReadings();
+      _energyReport = _aiService.generateEnergyReport();
+      _insights = _aiService.analyzeData(sensorData);
 
-    // Generate predictions
-    final tempHistory = _deviceService.getHistoricalData(SensorType.temperature, const Duration(hours: 24));
-    _predictions = _aiService.predictTrend(tempHistory, 6);
+      // Generate predictions
+      final tempHistory = _deviceService.getHistoricalData(SensorType.temperature, const Duration(hours: 24));
+      _predictions = _aiService.predictTrend(tempHistory, 6);
 
-    // Detect anomalies
-    _anomalies = _aiService.detectAnomalies(tempHistory);
+      // Detect anomalies
+      _anomalies = _aiService.detectAnomalies(tempHistory);
+    } else {
+      _energyReport = {};
+      _insights = [];
+      _predictions = [];
+      _anomalies = [];
+    }
 
     _isLoading = false;
     notifyListeners();

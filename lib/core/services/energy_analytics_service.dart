@@ -309,7 +309,35 @@ class EnergyAnalyticsService extends ChangeNotifier {
   double get carbonFootprint => _carbonFootprint;
 
   EnergyAnalyticsService() {
-    _initializeAll();
+    // Don't initialize data by default — only when demo mode is activated
+  }
+
+  /// Whether this service should generate simulated data.
+  bool _demoMode = false;
+  bool get isDemoMode => _demoMode;
+
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    if (value) {
+      _initializeAll();
+    } else {
+      _clearData();
+    }
+    notifyListeners();
+  }
+
+  void _clearData() {
+    _costData = null;
+    _savingsData = null;
+    _comparison = null;
+    _billEstimate = null;
+    _solarData = null;
+    _batteryData = null;
+    _waveform = null;
+    _waterAnalytics = null;
+    _leaderboard = [];
+    _powerFactorTips = [];
+    _carbonFootprint = 0;
   }
 
   void _initializeAll() {

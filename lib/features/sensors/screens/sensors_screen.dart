@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/core/services/demo_mode_service.dart';
 import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
+import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/core/models/sensor_data.dart';
 import 'package:smart_home_ai/features/sensors/providers/sensor_provider.dart';
 
@@ -32,7 +34,9 @@ class _SensorsScreenState extends State<SensorsScreen>
         child: SafeArea(
           child: sensorProvider.isLoading
               ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
-              : CustomScrollView(
+              : !sensorProvider.hasData && !context.watch<DemoModeService>().isDemoMode
+                  ? EmptyStateWidget.noSensorData()
+                  : CustomScrollView(
                   physics: WebContentWrapper.scrollPhysics,
                   slivers: [
                     // Header

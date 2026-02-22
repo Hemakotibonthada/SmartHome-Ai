@@ -975,8 +975,62 @@ class AdvancedHomeService extends ChangeNotifier {
   WasteManagementData? get wasteManagement => _wasteManagement;
 
   AdvancedHomeService() {
-    _initializeAll();
-    _updateTimer = Timer.periodic(const Duration(seconds: 30), (_) => _updateLiveData());
+    // Don't initialize data by default — only when demo mode is activated
+  }
+
+  /// Whether this service should generate simulated data.
+  bool _demoMode = false;
+  bool get isDemoMode => _demoMode;
+
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    if (value) {
+      _initializeAll();
+      _updateTimer ??= Timer.periodic(const Duration(seconds: 30), (_) => _updateLiveData());
+    } else {
+      _clearData();
+      _updateTimer?.cancel();
+      _updateTimer = null;
+    }
+    notifyListeners();
+  }
+
+  void _clearData() {
+    _blinds = [];
+    _robotVacuum = null;
+    _smartOven = null;
+    _washingMachine = null;
+    _dishwasher = null;
+    _garageDoors = [];
+    _sprinklerZones = [];
+    _petFeeders = [];
+    _babyMonitor = null;
+    _evCharger = null;
+    _airPurifiers = [];
+    _doorbellEvents = [];
+    _poolController = null;
+    _smartMirror = null;
+    _predictions = [];
+    _anomalies = [];
+    _learnedHabits = [];
+    _voiceCommands = [];
+    _weatherAutomations = [];
+    _circadianLighting = null;
+    _hvacZones = [];
+    _lifecycles = [];
+    _sleepHistory = [];
+    _plants = [];
+    _weatherStation = null;
+    _inventory = [];
+    _smartNotifications = [];
+    _automationRules = [];
+    _audioZones = [];
+    _homeTheater = null;
+    _gamingMode = null;
+    _wellness = null;
+    _workout = null;
+    _aquarium = null;
+    _wasteManagement = null;
   }
 
   void _initializeAll() {

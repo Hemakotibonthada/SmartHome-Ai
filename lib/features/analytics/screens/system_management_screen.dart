@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/core/services/demo_mode_service.dart';
 import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
 import 'package:smart_home_ai/shared/widgets/hover_card.dart';
+import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/core/services/advanced_home_service.dart';
 import 'package:smart_home_ai/core/services/security_lifestyle_service.dart';
 
@@ -14,12 +16,24 @@ class SystemManagementScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final adv = context.watch<AdvancedHomeService>();
     final sec = context.watch<SecurityLifestyleService>();
+    final isDemo = context.watch<DemoModeService>().isDemoMode;
 
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
         child: SafeArea(
-          child: CustomScrollView(
+          child: !isDemo && sec.homeScore == null
+              ? Column(
+                  children: [
+                    _buildHeader(context),
+                    const Expanded(child: EmptyStateWidget(
+                      icon: Icons.settings_suggest,
+                      title: 'System Not Configured',
+                      message: 'Connect your smart home system to view management data. Enable Demo Mode to explore all features.',
+                    )),
+                  ],
+                )
+              : CustomScrollView(
             physics: WebContentWrapper.scrollPhysics,
             slivers: [
               SliverToBoxAdapter(child: _buildHeader(context)),

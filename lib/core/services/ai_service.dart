@@ -22,6 +22,15 @@ class AIService extends ChangeNotifier {
 
   bool get isInitialized => _isInitialized;
 
+  /// Whether this service should generate simulated data.
+  bool _demoMode = false;
+  bool get isDemoMode => _demoMode;
+
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    notifyListeners();
+  }
+
   void initialize() {
     if (_isInitialized) return;
     _isInitialized = true;
@@ -30,6 +39,7 @@ class AIService extends ChangeNotifier {
 
   /// Analyze sensor data and generate AI insights
   List<AIInsight> analyzeData(Map<String, SensorData> sensorData) {
+    if (!_demoMode) return []; // Live mode: no simulated insights
     final insights = <AIInsight>[];
 
     // Temperature Analysis
@@ -206,6 +216,7 @@ class AIService extends ChangeNotifier {
 
   /// Predict future sensor values using simple trend analysis
   List<Map<String, dynamic>> predictTrend(List<SensorData> historicalData, int hoursAhead) {
+    if (!_demoMode) return []; // Live mode: no simulated predictions
     if (historicalData.isEmpty) return [];
 
     final predictions = <Map<String, dynamic>>[];
@@ -243,6 +254,7 @@ class AIService extends ChangeNotifier {
 
   /// Generate energy report
   Map<String, dynamic> generateEnergyReport() {
+    if (!_demoMode) return {}; // Live mode: no simulated energy report
     return {
       'dailyConsumption': 12.5 + _random.nextDouble() * 3,
       'weeklyConsumption': 85.0 + _random.nextDouble() * 15,
@@ -264,6 +276,7 @@ class AIService extends ChangeNotifier {
 
   /// Anomaly detection
   List<Map<String, dynamic>> detectAnomalies(List<SensorData> data) {
+    if (!_demoMode) return []; // Live mode: no simulated anomalies
     if (data.length < 10) return [];
 
     final anomalies = <Map<String, dynamic>>[];
@@ -295,6 +308,7 @@ class AIService extends ChangeNotifier {
 
   /// Returns a high-level summary of all 100 AI features grouped by engine
   Map<String, dynamic> getAIDashboardSummary() {
+    if (!_demoMode) return {}; // Live mode: no simulated AI summary
     return {
       'total_features': 100,
       'engines': [
@@ -449,6 +463,7 @@ class AIService extends ChangeNotifier {
 
   /// Generate a composite smart home score across all AI engines
   Map<String, dynamic> getCompositeSmartHomeScore() {
+    if (!_demoMode) return {}; // Live mode: no simulated scores
     final energyScore = 70 + _random.nextInt(25);
     final comfortScore = 75 + _random.nextInt(20);
     final securityScore = 80 + _random.nextInt(15);
@@ -478,6 +493,7 @@ class AIService extends ChangeNotifier {
 
   /// Cross-engine event correlation
   Map<String, dynamic> correlateEvents(Map<String, SensorData> currentData) {
+    if (!_demoMode) return {'correlations': [], 'timestamp': DateTime.now().toIso8601String(), 'engines_checked': 0};
     final correlations = <Map<String, dynamic>>[];
 
     final temp = currentData['temperature'];

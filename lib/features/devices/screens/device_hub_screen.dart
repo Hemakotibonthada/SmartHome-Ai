@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/core/services/demo_mode_service.dart';
 import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
 import 'package:smart_home_ai/shared/widgets/hover_card.dart';
+import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/core/services/advanced_home_service.dart';
 
 class DeviceHubScreen extends StatelessWidget {
@@ -12,12 +14,20 @@ class DeviceHubScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final svc = context.watch<AdvancedHomeService>();
+    final isDemo = context.watch<DemoModeService>().isDemoMode;
 
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
         child: SafeArea(
-          child: CustomScrollView(
+          child: !isDemo && svc.blinds.isEmpty
+              ? Column(
+                  children: [
+                    _buildHeader(context),
+                    Expanded(child: EmptyStateWidget.noDevices()),
+                  ],
+                )
+              : CustomScrollView(
             physics: WebContentWrapper.scrollPhysics,
             slivers: [
               SliverToBoxAdapter(child: _buildHeader(context)),

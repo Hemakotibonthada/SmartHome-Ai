@@ -406,9 +406,41 @@ class SmartFeaturesService extends ChangeNotifier {
 
   Timer? _updateTimer;
 
+  /// Whether this service should generate simulated data.
+  bool _demoMode = false;
+  bool get isDemoMode => _demoMode;
+
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    if (value) {
+      _initializeData();
+      _updateTimer ??= Timer.periodic(const Duration(seconds: 20), (_) => _updateLiveData());
+    } else {
+      _clearData();
+      _updateTimer?.cancel();
+      _updateTimer = null;
+    }
+    notifyListeners();
+  }
+
+  void _clearData() {
+    _scenes = [];
+    _schedules = [];
+    _routines = [];
+    _comfortIndex = null;
+    _airQuality = null;
+    _healthReports = [];
+    _activityLog = [];
+    _maintenanceTasks = [];
+    _geofenceRules = [];
+    _doorWindowStatus = [];
+    _adaptiveThresholds = {};
+    _roomOccupancy = [];
+    _fingerprints = [];
+  }
+
   SmartFeaturesService() {
-    _initializeData();
-    _updateTimer = Timer.periodic(const Duration(seconds: 20), (_) => _updateLiveData());
+    // Don't initialize data by default — only when demo mode is activated
   }
 
   void _initializeData() {

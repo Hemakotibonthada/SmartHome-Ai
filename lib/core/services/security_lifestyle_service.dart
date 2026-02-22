@@ -655,8 +655,47 @@ class SecurityLifestyleService extends ChangeNotifier {
   List<ServiceProvider> get serviceProviders => _serviceProviders;
 
   SecurityLifestyleService() {
-    _initializeAll();
-    _updateTimer = Timer.periodic(const Duration(seconds: 30), (_) => _updateLiveData());
+    // Don't initialize data by default — only when demo mode is activated
+  }
+
+  /// Whether this service should generate simulated data.
+  bool _demoMode = false;
+  bool get isDemoMode => _demoMode;
+
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    if (value) {
+      _initializeAll();
+      _updateTimer ??= Timer.periodic(const Duration(seconds: 30), (_) => _updateLiveData());
+    } else {
+      _clearData();
+      _updateTimer?.cancel();
+      _updateTimer = null;
+    }
+    notifyListeners();
+  }
+
+  void _clearData() {
+    _faceRecognitions = [];
+    _intruderAlerts = [];
+    _panicButton = PanicButtonState();
+    _packages = [];
+    _visitors = [];
+    _evacuationRoutes = [];
+    _floodSensors = [];
+    _cameraAnalytics = [];
+    _accessEvents = [];
+    _perimeterZones = [];
+    _neighborhoodAlerts = [];
+    _rainwater = null;
+    _carbonTracking = null;
+    _greenScore = null;
+    _networkHealth = null;
+    _familyMembers = [];
+    _firmwareDevices = [];
+    _homeScore = null;
+    _energyAudit = null;
+    _serviceProviders = [];
   }
 
   void _initializeAll() {

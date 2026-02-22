@@ -224,10 +224,61 @@ class AdminProvider extends ChangeNotifier {
   List<double> get requestsPerMinute => _requestsPerMinute;
 
   AdminProvider() {
-    loadAdminData();
+    // Don't load data by default — only when demo mode is activated
+  }
+
+  /// Whether this provider should generate simulated data.
+  bool _demoMode = false;
+  bool get isDemoMode => _demoMode;
+
+  void setDemoMode(bool value) {
+    _demoMode = value;
+    if (value) {
+      loadAdminData();
+      _startLiveUpdates();
+    } else {
+      _clearData();
+      _updateTimer?.cancel();
+      _updateTimer = null;
+    }
+    notifyListeners();
+  }
+
+  void _clearData() {
+    _totalUsers = 0;
+    _activeDevices = 0;
+    _totalDevices = 0;
+    _alerts = 0;
+    _uptime = 0;
+    _cpuUsage = 0;
+    _memoryUsage = 0;
+    _networkTraffic = 0;
+    _diskUsage = 0;
+    _apiCalls24h = 0;
+    _mqttMessages24h = 0;
+    _avgResponseTime = 0;
+    _systemLogs = [];
+    _userActivities = [];
+    _users = [];
+    _aiModels = [];
+    _trainingJobs = [];
+    _deviceNodes = [];
+    _apiEndpoints = [];
+    _backups = [];
+    _securityEvents = [];
+    _cpuHistory = [];
+    _memoryHistory = [];
+    _networkHistory = [];
+    _requestsPerMinute = [];
+    _isLoading = false;
   }
 
   Future<void> loadAdminData() async {
+    if (!_demoMode) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
     _isLoading = true;
     notifyListeners();
 
@@ -263,7 +314,9 @@ class AdminProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
 
+  void _startLiveUpdates() {
     _updateTimer?.cancel();
     _updateTimer = Timer.periodic(const Duration(seconds: 30), (_) => _updateLiveMetrics());
   }
