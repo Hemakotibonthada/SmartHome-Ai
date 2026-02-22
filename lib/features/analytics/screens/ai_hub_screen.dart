@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
+import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
+import 'package:smart_home_ai/shared/widgets/hover_card.dart';
 import 'package:smart_home_ai/core/services/advanced_home_service.dart';
 
 class AIHubScreen extends StatelessWidget {
@@ -15,20 +18,52 @@ class AIHubScreen extends StatelessWidget {
         decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
         child: SafeArea(
           child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: WebContentWrapper.scrollPhysics,
             slivers: [
               SliverToBoxAdapter(child: _buildHeader(context)),
-              SliverToBoxAdapter(child: _buildPredictiveMaintenance(svc)),
-              SliverToBoxAdapter(child: _buildAnomalyDetection(svc)),
-              SliverToBoxAdapter(child: _buildHabitLearning(svc)),
-              SliverToBoxAdapter(child: _buildVoiceCommands(svc)),
-              SliverToBoxAdapter(child: _buildWeatherAutomation(svc)),
-              SliverToBoxAdapter(child: _buildCircadianLighting(svc)),
-              SliverToBoxAdapter(child: _buildHVACZones(svc)),
-              SliverToBoxAdapter(child: _buildSleepQuality(svc)),
-              SliverToBoxAdapter(child: _buildAutomationRules(svc)),
-              SliverToBoxAdapter(child: _buildPlantCare(svc)),
-              SliverToBoxAdapter(child: _buildWeatherStation(svc)),
+              SliverToBoxAdapter(
+                child: Responsive.isDesktop(context)
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(children: [
+                                _buildPredictiveMaintenance(svc),
+                                _buildHabitLearning(svc),
+                                _buildWeatherAutomation(svc),
+                                _buildHVACZones(svc),
+                                _buildAutomationRules(svc),
+                                _buildWeatherStation(svc),
+                              ]),
+                            ),
+                            Expanded(
+                              child: Column(children: [
+                                _buildAnomalyDetection(svc),
+                                _buildVoiceCommands(svc),
+                                _buildCircadianLighting(svc),
+                                _buildSleepQuality(svc),
+                                _buildPlantCare(svc),
+                              ]),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Column(children: [
+                        _buildPredictiveMaintenance(svc),
+                        _buildAnomalyDetection(svc),
+                        _buildHabitLearning(svc),
+                        _buildVoiceCommands(svc),
+                        _buildWeatherAutomation(svc),
+                        _buildCircadianLighting(svc),
+                        _buildHVACZones(svc),
+                        _buildSleepQuality(svc),
+                        _buildAutomationRules(svc),
+                        _buildPlantCare(svc),
+                        _buildWeatherStation(svc),
+                      ]),
+              ),
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           ),
@@ -42,9 +77,14 @@ class AIHubScreen extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppTheme.darkCard, borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20)),
+          Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => Navigator.pop(context),
+              child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppTheme.darkCard, borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20)),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -557,21 +597,26 @@ class AIHubScreen extends StatelessWidget {
   Widget _buildSectionCard(String title, IconData icon, Color color, Widget content) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Container(
+      child: HoverCard(
+        borderColor: color.withValues(alpha: 0.2),
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppTheme.darkCard,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.2)),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon, color: color, size: 22),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
                 const SizedBox(width: 10),
-                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                Expanded(
+                  child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                ),
               ],
             ),
             const SizedBox(height: 16),

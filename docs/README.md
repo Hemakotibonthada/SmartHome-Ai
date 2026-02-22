@@ -59,4 +59,4 @@ This project is proprietary. See the repository for license details.
 
 ---
 
-*SmartHome AI v1.0.0 — Built with Flutter & ESP32*
+*SmartHome AI v1.0.0 — Built with Flutter & ESP32 by Circuvent Technologies Pvt Ltd, Hyderabad*

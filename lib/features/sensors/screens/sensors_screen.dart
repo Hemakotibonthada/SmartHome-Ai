@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
+import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
 import 'package:smart_home_ai/core/models/sensor_data.dart';
 import 'package:smart_home_ai/features/sensors/providers/sensor_provider.dart';
 
@@ -31,7 +33,7 @@ class _SensorsScreenState extends State<SensorsScreen>
           child: sensorProvider.isLoading
               ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
               : CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
+                  physics: WebContentWrapper.scrollPhysics,
                   slivers: [
                     // Header
                     SliverToBoxAdapter(child: _buildHeader()),
@@ -130,7 +132,9 @@ class _SensorsScreenState extends State<SensorsScreen>
 
           return GestureDetector(
             onTap: () => provider.setSelectedSensor(type),
-            child: AnimatedContainer(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -159,6 +163,7 @@ class _SensorsScreenState extends State<SensorsScreen>
                   ),
                 ],
               ),
+            ),
             ),
           );
         },

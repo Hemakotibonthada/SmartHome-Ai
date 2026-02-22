@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
+import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
+import 'package:smart_home_ai/shared/widgets/hover_card.dart';
 import 'package:smart_home_ai/core/models/sensor_data.dart';
 import 'package:smart_home_ai/core/services/smart_features_service.dart';
 import 'package:smart_home_ai/core/services/energy_analytics_service.dart';
@@ -80,7 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   onRefresh: () => dashboard.loadData(),
                   color: AppTheme.primaryColor,
                   child: CustomScrollView(
-                    physics: const BouncingScrollPhysics(),
+                    physics: WebContentWrapper.scrollPhysics,
                     slivers: [
                       // App Bar
                       SliverToBoxAdapter(
@@ -315,22 +319,29 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Widget _buildIconButton(IconData icon, VoidCallback onTap, {Color? color}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: AppTheme.darkCard,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        hoverColor: (color ?? AppTheme.primaryColor).withValues(alpha: 0.08),
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppTheme.darkCard,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+          ),
+          child: Icon(icon, color: color ?? Colors.white70, size: 22),
         ),
-        child: Icon(icon, color: color ?? Colors.white70, size: 22),
       ),
     );
   }
 
   Widget _buildStatusRow(DashboardProvider dashboard) {
+    final isDesktop = Responsive.isDesktop(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
@@ -441,14 +452,16 @@ class _DashboardScreenState extends State<DashboardScreen>
       dashboard.sensorData['current'],
     ].whereType<SensorData>().toList();
 
+    final cols = Responsive.isDesktop(context) ? 4 : 2;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: RepaintBoundary(
         child: GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
             childAspectRatio: 1.2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
@@ -645,34 +658,34 @@ class _DashboardScreenState extends State<DashboardScreen>
       _FeatureItem('System', Icons.settings_suggest, const Color(0xFF607D8B), () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SystemManagementScreen()))),
     ];
 
+    final cols = Responsive.isWideDesktop(context) ? 6 : Responsive.isDesktop(context) ? 5 : 4;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: RepaintBoundary(
         child: GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 0.85,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 0.85,
           ),
           itemCount: features.length,
           itemBuilder: (ctx, i) {
             final f = features[i];
-            return GestureDetector(
+            return HoverCard(
               onTap: f.onTap,
-              child: Container(
-                decoration: BoxDecoration(color: AppTheme.darkCard, borderRadius: BorderRadius.circular(16)),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: f.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
-                      child: Icon(f.icon, color: f.color, size: 22),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(f.label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white70), textAlign: TextAlign.center),
-                  ],
-                ),
+              borderColor: f.color.withValues(alpha: 0.15),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(color: f.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+                    child: Icon(f.icon, color: f.color, size: 22),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(f.label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.white70), textAlign: TextAlign.center),
+                ],
               ),
             );
           },

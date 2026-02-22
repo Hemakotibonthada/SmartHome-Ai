@@ -1082,9 +1082,10 @@ class _LandingPageState extends State<LandingPage> {
         ),
         const SizedBox(height: 20),
         const Text(
-          'SmartHome AI was founded in 2024 with a mission to make intelligent home '
-          'automation accessible to everyone. Our team combines expertise in AI, IoT, '
-          'and beautiful design to create the most intuitive smart home platform.',
+          'SmartHome AI is a product of Circuvent Technologies Pvt Ltd, Hyderabad. '
+          'Founded in 2024, our mission is to make intelligent home automation accessible '
+          'to everyone. Our team combines expertise in AI, IoT, and beautiful design to '
+          'create the most intuitive smart home platform.',
           style: TextStyle(color: Colors.white60, fontSize: 15, height: 1.7),
         ),
         const SizedBox(height: 16),
@@ -1130,8 +1131,8 @@ class _LandingPageState extends State<LandingPage> {
       child: Column(
         children: [
           _aboutStatRow('Founded', '2024', Icons.calendar_today),
-          _aboutStatRow('Team Size', '48 Engineers', Icons.people),
-          _aboutStatRow('Offices', 'SF, London, Bengaluru', Icons.location_on),
+          _aboutStatRow('Company', 'Circuvent Technologies', Icons.business),
+          _aboutStatRow('HQ', 'Hyderabad, India', Icons.location_on),
           _aboutStatRow('Devices Managed', '2M+', Icons.devices_other),
           _aboutStatRow('Energy Saved', '450 GWh', Icons.bolt),
           _aboutStatRow('CO₂ Reduced', '120K Tons', Icons.eco),
@@ -1208,7 +1209,7 @@ class _LandingPageState extends State<LandingPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('© 2026 SmartHome AI. All rights reserved.',
+              const Text('© 2026 Circuvent Technologies Pvt Ltd. All rights reserved.',
                   style: TextStyle(color: Colors.white30, fontSize: 12)),
               Row(
                 children: [

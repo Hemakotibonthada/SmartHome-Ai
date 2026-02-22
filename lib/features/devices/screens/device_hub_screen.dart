@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
+import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
+import 'package:smart_home_ai/shared/widgets/hover_card.dart';
 import 'package:smart_home_ai/core/services/advanced_home_service.dart';
 
 class DeviceHubScreen extends StatelessWidget {
@@ -15,20 +18,53 @@ class DeviceHubScreen extends StatelessWidget {
         decoration: const BoxDecoration(gradient: AppTheme.darkGradient),
         child: SafeArea(
           child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
+            physics: WebContentWrapper.scrollPhysics,
             slivers: [
               SliverToBoxAdapter(child: _buildHeader(context)),
-              SliverToBoxAdapter(child: _buildRobotVacuumCard(svc)),
-              SliverToBoxAdapter(child: _buildSmartBlindsSection(svc)),
-              SliverToBoxAdapter(child: _buildKitchenAppliances(svc)),
-              SliverToBoxAdapter(child: _buildGarageDoors(svc)),
-              SliverToBoxAdapter(child: _buildSprinklerZones(svc)),
-              SliverToBoxAdapter(child: _buildPetFeeders(svc)),
-              SliverToBoxAdapter(child: _buildBabyMonitor(svc)),
-              SliverToBoxAdapter(child: _buildEVCharger(svc)),
-              SliverToBoxAdapter(child: _buildAirPurifiers(svc)),
-              SliverToBoxAdapter(child: _buildPoolController(svc)),
-              SliverToBoxAdapter(child: _buildDoorbellEvents(svc)),
+              // Responsive two-column layout for sections on desktop
+              SliverToBoxAdapter(
+                child: Responsive.isDesktop(context)
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(children: [
+                                _buildRobotVacuumCard(svc),
+                                _buildKitchenAppliances(svc),
+                                _buildSprinklerZones(svc),
+                                _buildBabyMonitor(svc),
+                                _buildAirPurifiers(svc),
+                                _buildDoorbellEvents(svc),
+                              ]),
+                            ),
+                            Expanded(
+                              child: Column(children: [
+                                _buildSmartBlindsSection(svc),
+                                _buildGarageDoors(svc),
+                                _buildPetFeeders(svc),
+                                _buildEVCharger(svc),
+                                _buildPoolController(svc),
+                              ]),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Column(children: [
+                        _buildRobotVacuumCard(svc),
+                        _buildSmartBlindsSection(svc),
+                        _buildKitchenAppliances(svc),
+                        _buildGarageDoors(svc),
+                        _buildSprinklerZones(svc),
+                        _buildPetFeeders(svc),
+                        _buildBabyMonitor(svc),
+                        _buildEVCharger(svc),
+                        _buildAirPurifiers(svc),
+                        _buildPoolController(svc),
+                        _buildDoorbellEvents(svc),
+                      ]),
+              ),
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           ),
@@ -42,12 +78,17 @@ class DeviceHubScreen extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: AppTheme.darkCard, borderRadius: BorderRadius.circular(12)),
-              child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: AppTheme.darkCard, borderRadius: BorderRadius.circular(12)),
+                child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+              ),
             ),
           ),
           const SizedBox(width: 16),

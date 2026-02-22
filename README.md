@@ -144,6 +144,11 @@ sudo systemctl start mosquitto
 - `PZEM-004T-v30` — AC power monitoring
 - `ArduinoOTA` — Over-the-air updates
 
+## Company
+
+**Circuvent Technologies Pvt Ltd**
+Hyderabad, India
+
 ## License
 
 MIT License

@@ -65,7 +65,7 @@ class AuthProvider extends ChangeNotifier {
     _user = UserModel(
       id: 'demo_user',
       name: 'Demo User',
-      email: 'demo@smarthome.ai',
+      email: 'demo@circuvent.com',
       role: UserRole.admin,
       homeId: 'home_demo',
     );

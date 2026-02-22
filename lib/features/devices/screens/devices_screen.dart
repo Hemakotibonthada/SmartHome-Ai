@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
+import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
 import 'package:smart_home_ai/core/models/device_model.dart';
 import 'package:smart_home_ai/features/devices/providers/device_provider.dart';
 import 'package:smart_home_ai/features/devices/widgets/device_card.dart';
@@ -29,7 +31,7 @@ class _DevicesScreenState extends State<DevicesScreen>
           child: deviceProvider.isLoading
               ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
               : CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
+                  physics: WebContentWrapper.scrollPhysics,
                   slivers: [
                     // Header
                     SliverToBoxAdapter(child: _buildHeader(deviceProvider)),
@@ -41,11 +43,11 @@ class _DevicesScreenState extends State<DevicesScreen>
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       sliver: SliverGrid(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: Responsive.isWideDesktop(context) ? 4 : Responsive.isDesktop(context) ? 3 : 2,
                           childAspectRatio: 0.85,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
@@ -137,7 +139,9 @@ class _DevicesScreenState extends State<DevicesScreen>
 
           return GestureDetector(
             onTap: () => provider.setSelectedRoom(room),
-            child: AnimatedContainer(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -154,6 +158,7 @@ class _DevicesScreenState extends State<DevicesScreen>
                   color: isSelected ? Colors.white : Colors.white38,
                 ),
               ),
+            ),
             ),
           );
         },

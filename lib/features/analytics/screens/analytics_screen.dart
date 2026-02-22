@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:smart_home_ai/core/theme/app_theme.dart';
+import 'package:smart_home_ai/core/utils/responsive.dart';
+import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
 import 'package:smart_home_ai/core/models/user_model.dart';
 import 'package:smart_home_ai/features/analytics/providers/analytics_provider.dart';
 
@@ -32,16 +34,51 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   onRefresh: () => analytics.loadAnalytics(),
                   color: AppTheme.primaryColor,
                   child: CustomScrollView(
-                    physics: const BouncingScrollPhysics(),
+                    physics: WebContentWrapper.scrollPhysics,
                     slivers: [
                       SliverToBoxAdapter(child: _buildHeader()),
                       SliverToBoxAdapter(child: _buildPeriodSelector(analytics)),
-                      SliverToBoxAdapter(child: _buildEnergyOverview(analytics)),
-                      SliverToBoxAdapter(child: _buildConsumptionChart(analytics)),
+                      // On desktop, show energy overview and chart side by side
+                      if (Responsive.isDesktop(context))
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: _buildEnergyOverview(analytics)),
+                                Expanded(child: _buildConsumptionChart(analytics)),
+                              ],
+                            ),
+                          ),
+                        )
+                      else ...[
+                        SliverToBoxAdapter(child: _buildEnergyOverview(analytics)),
+                        SliverToBoxAdapter(child: _buildConsumptionChart(analytics)),
+                      ],
                       SliverToBoxAdapter(child: _buildTopConsumers(analytics)),
-                      SliverToBoxAdapter(child: _buildAIInsightsSection(analytics)),
-                      SliverToBoxAdapter(child: _buildPredictionSection(analytics)),
-                      SliverToBoxAdapter(child: _buildAnomalySection(analytics)),
+                      // On desktop: AI insights and predictions side by side
+                      if (Responsive.isDesktop(context))
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: _buildAIInsightsSection(analytics)),
+                                Expanded(child: Column(children: [
+                                  _buildPredictionSection(analytics),
+                                  _buildAnomalySection(analytics),
+                                ])),
+                              ],
+                            ),
+                          ),
+                        )
+                      else ...[
+                        SliverToBoxAdapter(child: _buildAIInsightsSection(analytics)),
+                        SliverToBoxAdapter(child: _buildPredictionSection(analytics)),
+                        SliverToBoxAdapter(child: _buildAnomalySection(analytics)),
+                      ],
                       const SliverToBoxAdapter(child: SizedBox(height: 100)),
                     ],
                   ),
@@ -110,7 +147,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           return Expanded(
             child: GestureDetector(
               onTap: () => analytics.setSelectedPeriod(period),
-              child: AnimatedContainer(
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -128,6 +167,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                     color: isSelected ? Colors.white : Colors.white38,
                   ),
                 ),
+              ),
               ),
             ),
           );

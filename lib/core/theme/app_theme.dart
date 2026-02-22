@@ -83,6 +83,7 @@ class AppTheme {
       brightness: Brightness.dark,
       primaryColor: primaryColor,
       scaffoldBackgroundColor: darkBg,
+      visualDensity: VisualDensity.adaptivePlatformDensity,
       colorScheme: const ColorScheme.dark(
         primary: primaryColor,
         secondary: secondaryColor,
@@ -109,6 +110,29 @@ class AppTheme {
           color: Colors.white,
         ),
       ),
+      // Web scrollbar styling
+      scrollbarTheme: ScrollbarThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered) ||
+              states.contains(WidgetState.dragged)) {
+            return primaryColor.withValues(alpha: 0.6);
+          }
+          return Colors.white.withValues(alpha: 0.15);
+        }),
+        trackColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.03)),
+        radius: const Radius.circular(8),
+        thickness: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered)) return 8.0;
+          return 5.0;
+        }),
+        thumbVisibility: WidgetStateProperty.all(true),
+        interactive: true,
+      ),
+      // Hover/splash for web
+      hoverColor: primaryColor.withValues(alpha: 0.04),
+      splashColor: primaryColor.withValues(alpha: 0.08),
+      highlightColor: primaryColor.withValues(alpha: 0.06),
+      focusColor: primaryColor.withValues(alpha: 0.08),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: darkSurface,
         selectedItemColor: primaryColor,

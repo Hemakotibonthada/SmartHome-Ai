@@ -1,5 +1,7 @@
 # Architecture
 
+> **SmartHome AI** — A product of **Circuvent Technologies Pvt Ltd**, Hyderabad
+
 ## System Overview
 
 SmartHome AI follows a **layered architecture** combining a cross-platform Flutter frontend with ESP32 IoT hardware, connected through Firebase and MQTT.
