@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_home_ai/core/models/device_model.dart';
 import 'package:smart_home_ai/core/services/device_service.dart';
+import 'package:smart_home_ai/core/services/mqtt_service.dart';
 
 class DeviceProvider extends ChangeNotifier {
   final DeviceService _deviceService = DeviceService();
+  MqttService? _mqttService;
+  StreamSubscription? _mqttDeviceSub;
 
   List<SmartDevice> _devices = [];
   List<Room> _rooms = [];
@@ -28,6 +32,30 @@ class DeviceProvider extends ChangeNotifier {
 
   DeviceProvider();
 
+  /// Link the MQTT service for live device data.
+  void setMqttService(MqttService service) {
+    _mqttService = service;
+    _mqttDeviceSub?.cancel();
+    _mqttDeviceSub = service.deviceStatusStream.listen((_) {
+      if (!_demoMode) {
+        _devices = service.liveDevices;
+        _rooms = _buildRoomsFromDevices();
+        notifyListeners();
+      }
+    });
+  }
+
+  List<Room> _buildRoomsFromDevices() {
+    final roomNames = _devices.map((d) => d.room).toSet();
+    return roomNames.map((name) => Room(
+      id: name.toLowerCase().replaceAll(' ', '_'),
+      name: name,
+      icon: Icons.room,
+      color: Colors.blueAccent,
+      deviceIds: _devices.where((d) => d.room == name).map((d) => d.id).toList(),
+    )).toList();
+  }
+
   /// Called when demo mode changes.
   void setDemoMode(bool value) {
     _demoMode = value;
@@ -35,8 +63,14 @@ class DeviceProvider extends ChangeNotifier {
     if (value) {
       loadDevices();
     } else {
-      _devices = [];
-      _rooms = [];
+      // In live mode, load from MQTT if available
+      if (_mqttService != null && _mqttService!.liveDevices.isNotEmpty) {
+        _devices = _mqttService!.liveDevices;
+        _rooms = _buildRoomsFromDevices();
+      } else {
+        _devices = [];
+        _rooms = [];
+      }
       _isLoading = false;
       notifyListeners();
     }
@@ -70,6 +104,11 @@ class DeviceProvider extends ChangeNotifier {
     final index = _devices.indexWhere((d) => d.id == deviceId);
     if (index != -1) {
       _devices[index].isOn = !_devices[index].isOn;
+      // Send command via MQTT in live mode
+      if (!_demoMode && _mqttService != null) {
+        final name = _devices[index].name.toLowerCase().replaceAll(' ', '_');
+        _mqttService!.toggleDevice(name);
+      }
       notifyListeners();
     }
   }
@@ -78,6 +117,9 @@ class DeviceProvider extends ChangeNotifier {
     final index = _devices.indexWhere((d) => d.id == deviceId);
     if (index != -1) {
       _devices[index].brightness = value;
+      if (!_demoMode && _mqttService != null) {
+        _mqttService!.setLightBrightness(value.toInt());
+      }
       notifyListeners();
     }
   }
@@ -86,6 +128,9 @@ class DeviceProvider extends ChangeNotifier {
     final index = _devices.indexWhere((d) => d.id == deviceId);
     if (index != -1) {
       _devices[index].speed = value;
+      if (!_demoMode && _mqttService != null) {
+        _mqttService!.setFanSpeed(value.toInt());
+      }
       notifyListeners();
     }
   }

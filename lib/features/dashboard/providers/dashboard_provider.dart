@@ -5,10 +5,13 @@ import 'package:smart_home_ai/core/models/user_model.dart';
 import 'package:smart_home_ai/core/services/device_service.dart';
 import 'package:smart_home_ai/core/services/ai_service.dart';
 import 'package:smart_home_ai/core/services/demo_mode_service.dart';
+import 'package:smart_home_ai/core/services/mqtt_service.dart';
 
 class DashboardProvider extends ChangeNotifier {
   final DeviceService _deviceService = DeviceService();
   final AIService _aiService = AIService();
+  MqttService? _mqttService;
+  StreamSubscription? _mqttSensorSub;
   Timer? _refreshTimer;
 
   Map<String, SensorData> _sensorData = {};
@@ -27,12 +30,30 @@ class DashboardProvider extends ChangeNotifier {
   bool get hasData => _sensorData.isNotEmpty;
 
   // Quick stats
-  int get activeDevices => _demoMode ? 7 : 0;
-  int get totalDevices => _demoMode ? 12 : 0;
+  int get activeDevices {
+    if (_demoMode) return 7;
+    return _mqttService?.liveDevices.where((d) => d.isOn).length ?? 0;
+  }
+  int get totalDevices {
+    if (_demoMode) return 12;
+    return _mqttService?.liveDevices.length ?? 0;
+  }
   double get energyToday => (_energyReport['dailyConsumption'] ?? (_demoMode ? 12.5 : 0.0)).toDouble();
   int get alertCount => _insights.where((i) => i.priority == InsightPriority.high || i.priority == InsightPriority.critical).length;
 
   DashboardProvider();
+
+  /// Link the MQTT service for live dashboard data.
+  void setMqttService(MqttService service) {
+    _mqttService = service;
+    _mqttSensorSub?.cancel();
+    _mqttSensorSub = service.sensorStream.listen((_) {
+      if (!_demoMode) {
+        _sensorData = service.currentReadings;
+        notifyListeners();
+      }
+    });
+  }
 
   /// Called when demo mode changes — re-initializes data accordingly.
   void setDemoMode(bool value) {
@@ -45,7 +66,12 @@ class DashboardProvider extends ChangeNotifier {
     } else {
       _refreshTimer?.cancel();
       _deviceService.stopSimulation();
-      _sensorData = {};
+      // In live mode, load from MQTT if available
+      if (_mqttService != null && _mqttService!.hasLiveData) {
+        _sensorData = _mqttService!.currentReadings;
+      } else {
+        _sensorData = {};
+      }
       _insights = [];
       _energyReport = {};
       _isLoading = false;

@@ -4,6 +4,7 @@ import 'package:smart_home_ai/core/theme/app_theme.dart';
 import 'package:smart_home_ai/core/services/device_service.dart';
 import 'package:smart_home_ai/core/services/ai_service.dart';
 import 'package:smart_home_ai/core/services/demo_mode_service.dart';
+import 'package:smart_home_ai/core/services/mqtt_service.dart';
 import 'package:smart_home_ai/core/services/ai_prediction_engine.dart';
 import 'package:smart_home_ai/core/services/ai_anomaly_engine.dart';
 import 'package:smart_home_ai/core/services/ai_nlp_engine.dart';
@@ -30,6 +31,10 @@ class AppProviders {
     // Create the central demo-mode service
     final demoModeService = DemoModeService();
 
+    // Create the MQTT service (for live data)
+    final mqttService = MqttService();
+    mqttService.loadConfig(); // async but fire-and-forget at boot
+
     // Create the auth provider and link it to demo-mode service
     final authProvider = AuthProvider()..setDemoModeService(demoModeService);
 
@@ -45,6 +50,11 @@ class AppProviders {
     final sensorProvider = SensorProvider();
     final analyticsProvider = AnalyticsProvider();
     final adminProvider = AdminProvider();
+
+    // Link MQTT service to providers for live data
+    deviceProvider.setMqttService(mqttService);
+    sensorProvider.setMqttService(mqttService);
+    dashboardProvider.setMqttService(mqttService);
 
     // Listen to demo-mode changes and propagate to all services/providers
     demoModeService.addListener(() {
@@ -62,10 +72,18 @@ class AppProviders {
       sensorProvider.setDemoMode(isDemo);
       analyticsProvider.setDemoMode(isDemo);
       adminProvider.setDemoMode(isDemo);
+
+      // In live mode, auto-connect MQTT; in demo mode, disconnect
+      if (!isDemo) {
+        mqttService.connect();
+      } else {
+        mqttService.disconnect();
+      }
     });
 
     return [
       ChangeNotifierProvider.value(value: demoModeService),
+      ChangeNotifierProvider.value(value: mqttService),
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider.value(value: authProvider),
       Provider(create: (_) => DeviceService()),

@@ -1,6 +1,16 @@
 /*
  * Smart Home AI - ESP32 Configuration
- * Edit this file with your network and sensor settings
+ * ====================================
+ * Edit this file with your network and sensor settings.
+ *
+ * MQTT Broker: Run the Dart MQTT broker from server/ directory:
+ *   cd server && dart run bin/server.dart
+ *
+ * Set MQTT_SERVER to the IP of the machine running the broker.
+ * TCP port 1883 is used by ESP32 (native MQTT).
+ * WebSocket port 8083 is used by Flutter Web app.
+ *
+ * © 2026 Circuvent Technologies Pvt Ltd, Hyderabad
  */
 
 #ifndef CONFIG_H
@@ -10,7 +20,7 @@
 #define WIFI_SSID          "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD      "YOUR_WIFI_PASSWORD"
 
-// MQTT Broker
+// MQTT Broker (IP of the machine running server/bin/server.dart)
 #define MQTT_SERVER        "192.168.1.100"
 #define MQTT_PORT          1883
 #define MQTT_USER          "smarthome"

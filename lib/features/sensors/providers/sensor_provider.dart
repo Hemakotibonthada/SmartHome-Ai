@@ -2,9 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_home_ai/core/models/sensor_data.dart';
 import 'package:smart_home_ai/core/services/device_service.dart';
+import 'package:smart_home_ai/core/services/mqtt_service.dart';
 
 class SensorProvider extends ChangeNotifier {
   final DeviceService _deviceService = DeviceService();
+  MqttService? _mqttService;
+  StreamSubscription? _mqttSensorSub;
   Timer? _refreshTimer;
 
   Map<String, SensorData> _currentReadings = {};
@@ -28,6 +31,18 @@ class SensorProvider extends ChangeNotifier {
       _historicalData[_selectedSensor] ?? [];
 
   SensorProvider();
+
+  /// Link the MQTT service for live sensor data.
+  void setMqttService(MqttService service) {
+    _mqttService = service;
+    _mqttSensorSub?.cancel();
+    _mqttSensorSub = service.sensorStream.listen((_) {
+      if (!_demoMode) {
+        _currentReadings = service.currentReadings;
+        notifyListeners();
+      }
+    });
+  }
 
   /// Called when demo mode changes.
   void setDemoMode(bool value) {

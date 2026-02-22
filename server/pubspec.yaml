@@ -1,0 +1,22 @@
+name: smart_home_mqtt_server
+description: Smart Home AI — Self-hosted MQTT Broker & REST API Server by Circuvent Technologies Pvt Ltd
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  args: ^2.4.2
+  crypto: ^3.0.3
+  collection: ^1.18.0
+  convert: ^3.1.1
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
+  shelf_cors_headers: ^0.1.5
+  shelf_static: ^1.1.2
+  logging: ^1.2.0
+  uuid: ^4.2.1
+  path: ^1.8.3
+  yaml: ^3.1.2
+  intl: ^0.19.0

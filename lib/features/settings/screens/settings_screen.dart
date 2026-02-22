@@ -7,6 +7,7 @@ import 'package:smart_home_ai/shared/widgets/web_content_wrapper.dart';
 import 'package:smart_home_ai/shared/widgets/empty_state_widget.dart';
 import 'package:smart_home_ai/features/auth/providers/auth_provider.dart';
 import 'package:smart_home_ai/features/auth/screens/login_screen.dart';
+import 'package:smart_home_ai/features/settings/screens/mqtt_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -60,7 +61,9 @@ class _SettingsScreenState extends State<SettingsScreen>
               ])),
               SliverToBoxAdapter(child: _buildSection('Device Management', [
                 _buildNavigationItem('Connected Devices', 'Manage ESP32 nodes', Icons.devices),
-                _buildNavigationItem('MQTT Settings', 'Broker configuration', Icons.cloud),
+                _buildNavigationItem('MQTT Settings', 'Broker configuration', Icons.cloud, onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const MqttSettingsScreen()));
+                }),
                 _buildNavigationItem('WiFi Networks', 'Network settings', Icons.wifi),
                 _buildNavigationItem('Firmware Updates', 'Update device firmware', Icons.system_update),
               ])),
@@ -291,12 +294,12 @@ class _SettingsScreenState extends State<SettingsScreen>
     );
   }
 
-  Widget _buildNavigationItem(String title, String subtitle, IconData icon) {
+  Widget _buildNavigationItem(String title, String subtitle, IconData icon, {VoidCallback? onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {},
+        onTap: onTap ?? () {},
         hoverColor: AppTheme.primaryColor.withValues(alpha: 0.04),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
