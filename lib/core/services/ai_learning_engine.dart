@@ -311,9 +311,11 @@ class AILearningEngine extends ChangeNotifier {
   Map<String, dynamic> getLightingPreference(String room, {String? timeOfDay}) {
     final prefs = _learnedPreferences['lighting'] as Map<String, dynamic>? ?? _learnLightingPreference();
     final roomPrefs = (prefs['by_room'] as Map<String, dynamic>?)?[room] as Map<String, dynamic>?;
-    final timePrefs = timeOfDay != null
-        ? (prefs['by_time'] as Map<String, dynamic>?)?[timeOfDay] as Map<String, dynamic>?
-        : null;
+    Map<String, dynamic>? timePrefs;
+    if (timeOfDay != null) {
+      final byTime = prefs['by_time'] as Map<String, dynamic>?;
+      timePrefs = byTime?[timeOfDay] as Map<String, dynamic>?;
+    }
 
     return {
       'room': room,

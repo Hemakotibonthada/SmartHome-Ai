@@ -207,8 +207,8 @@ class AIAutomationEngine extends ChangeNotifier {
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return {
-      'device_priorities': sorted.map((e) => {
-        return {
+      'device_priorities': sorted.map((e) {
+        return <String, dynamic>{
           'device': e.key,
           'priority': e.value,
           'priority_label': e.value >= 9

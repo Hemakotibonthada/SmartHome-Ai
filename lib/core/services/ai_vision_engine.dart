@@ -534,9 +534,9 @@ class AIVisionEngine extends ChangeNotifier {
       'camera': cameraId,
       'timestamp': DateTime.now().toIso8601String(),
       'plants_analyzed': plants.length,
-      'plants': plants.map((p) => {
+      'plants': plants.map((p) {
             final healthScore = p['health'] as int;
-            return {
+            return <String, dynamic>{
               ...p,
               'health_status': healthScore > 85
                   ? 'excellent'
